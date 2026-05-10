@@ -238,6 +238,43 @@ body::before{
 }
 #discord-link:hover{background:#4752C4;transform:scale(1.04);}
 #discord-link svg{width:20px;height:20px;fill:#fff;flex-shrink:0;}
+/* AUTOCLICKER WARNING */
+#ac-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.92);
+  display:flex;align-items:center;justify-content:center;
+  z-index:500;opacity:0;pointer-events:none;
+  transition:opacity 0.3s;backdrop-filter:blur(6px);padding:20px;
+}
+#ac-backdrop.open{opacity:1;pointer-events:all;}
+#ac-modal{
+  width:100%;max-width:360px;background:#0d0600;
+  border:2px solid #ff3300;border-radius:16px;padding:28px 24px;text-align:center;
+  box-shadow:0 0 60px rgba(255,50,0,0.4),0 20px 60px rgba(0,0,0,0.8);
+  transform:scale(0.8);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+#ac-backdrop.open #ac-modal{transform:scale(1);}
+#ac-icon{font-size:60px;margin-bottom:8px;animation:robotShake 0.5s ease-in-out infinite alternate;}
+#ac-title{font-family:'Black Ops One',cursive;font-size:32px;color:#ff3300;letter-spacing:4px;text-shadow:0 0 20px #ff2200;margin-bottom:6px;}
+#ac-sub{font-size:16px;color:#ff6644;margin-bottom:14px;font-family:'Teko',sans-serif;letter-spacing:1px;}
+#ac-sub strong{color:#ff4422;}
+#ac-text{font-size:14px;color:#aa6644;line-height:1.8;margin-bottom:14px;font-family:'Teko',sans-serif;}
+#ac-text strong{color:#ff6644;}
+#ac-warning-box{
+  background:#1a0500;border:1px solid #441100;border-radius:8px;
+  padding:10px 14px;font-size:12px;color:#884422;
+  margin-bottom:18px;line-height:1.5;font-family:'Teko',sans-serif;
+}
+#ac-close-btn{
+  padding:13px 36px;background:linear-gradient(135deg,#cc1a00,#991000);
+  color:#fff;border:2px solid #ff3300;border-radius:50px;
+  font-family:'Black Ops One',cursive;font-size:16px;letter-spacing:2px;
+  cursor:pointer;box-shadow:0 4px 20px rgba(200,0,0,0.4);
+  transition:transform 0.1s;
+}
+#ac-close-btn:hover{transform:scale(1.05);}
+#ac-close-btn:active{transform:scale(0.97);}
+@keyframes robotShake{0%{transform:rotate(-8deg) scale(1);}100%{transform:rotate(8deg) scale(1.1);}}
+
 #impressum-btn{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 22px;background:#0d0600;border:1px solid #3a1800;border-radius:8px;
@@ -559,11 +596,41 @@ body::before{
 <script>
   const DURATION  = 8000;
   const MAX_SCORE = 1200;
+  const MAX_CPS = 12; // max allowed clicks per second (human limit ~10-11)
 
   let gameActive = false;
   let hits = 0, score = 0, bestScore = 0;
   let startTime = 0, tickInterval = null;
   let lastTouch = 0;
+
+  // Autoclicker detection
+  let clickTimes = [];
+  let autoClickWarned = false;
+
+  function checkAutoclicker() {
+    const now = Date.now();
+    clickTimes.push(now);
+    // keep only clicks in last 500ms
+    clickTimes = clickTimes.filter(t => now - t < 500);
+    // if more than MAX_CPS/2 clicks in 500ms = autoclicker
+    if (clickTimes.length > MAX_CPS / 2) {
+      return true;
+    }
+    return false;
+  }
+
+  function showAutoClickerWarning() {
+    gameActive = false;
+    clearInterval(tickInterval);
+    document.getElementById('ac-backdrop').classList.add('open');
+  }
+
+  function closeAutoWarning() {
+    document.getElementById('ac-backdrop').classList.remove('open');
+    autoClickWarned = false;
+    clickTimes = [];
+    goToMainMenu();
+  }
 
   const overlay    = document.getElementById('overlay');
   const timerNum   = document.getElementById('timer-num');
@@ -601,6 +668,8 @@ body::before{
     document.getElementById('ov-bottom').style.display = 'flex';
     hits = 0; score = 0;
     gameActive = true;
+    clickTimes = [];
+    autoClickWarned = false;
     startTime = Date.now();
     setScore(0);
     hitsNum.textContent = '0';
@@ -633,6 +702,13 @@ body::before{
     }
     e.stopPropagation();
     if (!gameActive) return;
+
+    // AUTOCLICKER CHECK
+    if (checkAutoclicker() && !autoClickWarned) {
+      autoClickWarned = true;
+      showAutoClickerWarning();
+      return;
+    }
 
     hits++;
     const pts = Math.floor(MAX_SCORE / 70);
@@ -715,6 +791,24 @@ body::before{
     overlay.style.display = 'flex';
   }
 </script>
+<!-- AUTOCLICKER WARNING MODAL -->
+<div id="ac-backdrop">
+  <div id="ac-modal">
+    <div id="ac-icon">🤖</div>
+    <div id="ac-title">ERWISCHT!</div>
+    <div id="ac-sub">Wir haben einen <strong>Autoclicker</strong> erkannt!</div>
+    <div id="ac-text">
+      Hier wird fair gespielt — nur echte Hände zählen! 💪<br><br>
+      Dein Score wurde <strong>zurückgesetzt</strong>.<br>
+      Spiel fair und zeig was du wirklich drauf hast!
+    </div>
+    <div id="ac-warning-box">
+      ⚠️ Bei wiederholtem Missbrauch wird der Score nicht gewertet.
+    </div>
+    <button id="ac-close-btn" onclick="closeAutoWarning()">👊 OK, ich spiele fair!</button>
+  </div>
+</div>
+
 <script>
   // ── COPY PROTECTION ──
   document.addEventListener('contextmenu', e => e.preventDefault());
