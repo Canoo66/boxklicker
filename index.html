@@ -578,6 +578,24 @@ body::before{
   function closeImpressum() { document.getElementById('imp-backdrop').classList.remove('open'); }
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeImpressum(); });
 
+  function goToMainMenu() {
+    // Reset overlay to full start screen
+    document.getElementById('ov-gloves').textContent = '🥊🥊';
+    document.getElementById('ov-title').textContent = 'BOX KLICKER';
+    document.getElementById('ov-tagline').innerHTML = 'Fange an zu zocken —<br>lass deine Wut raus!<br><span style="color:#ffaa22;font-size:0.85em;">Dein Chef kann dich nicht sehen. Hau rein! 😤</span>';
+    document.getElementById('ov-disclaimer').style.display = '';
+    document.getElementById('ov-sub').innerHTML = 'Klicke <strong style="color:#ffd040">8 Sekunden</strong> lang<br>NUR auf den roten Handschuh!';
+    document.getElementById('main-btn').textContent = '🥊 LOS GEHT\'S!';
+    document.getElementById('main-btn').onclick = startGame;
+    document.getElementById('ov-bottom').style.display = 'flex';
+    // reset counters display
+    timerNum.textContent = '8';
+    timerNum.className = 'counter-num time-c';
+    hitsNum.textContent = '0';
+    setScore(0);
+    overlay.style.display = 'flex';
+  }
+
   function startGame() {
     overlay.style.display = 'none';
     document.getElementById('ov-bottom').style.display = 'flex';
@@ -690,8 +708,9 @@ body::before{
       `<span style="color:#ffaa22;font-size:0.9em;">Schläge: <strong style="color:#ff4444">${hits}</strong> &nbsp;|&nbsp; Score: <strong style="color:#ffd040">${String(score).padStart(4,'0')}</strong> / 1200</span><br>` +
       `<span style="font-size:0.75em;color:#886633;">Rekord: ${String(bestScore).padStart(4,'0')}</span>`;
     document.getElementById('ov-disclaimer').style.display = 'none';
-    document.getElementById('ov-sub').innerHTML = 'Nochmal versuchen?';
-    document.getElementById('main-btn').textContent = '🥊 NOCHMAL!';
+    document.getElementById('ov-sub').innerHTML = '';
+    document.getElementById('main-btn').textContent = '🏠 HAUPTMENÜ';
+    document.getElementById('main-btn').onclick = goToMainMenu;
     document.getElementById('ov-bottom').style.display = 'none';
     overlay.style.display = 'flex';
   }
