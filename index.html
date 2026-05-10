@@ -715,5 +715,25 @@ body::before{
     overlay.style.display = 'flex';
   }
 </script>
+<script>
+  // ── COPY PROTECTION ──
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    // Block F12, Ctrl+U, Ctrl+S, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    if (e.ctrlKey && ['u','U','s','S'].includes(e.key)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C'].includes(e.key)) { e.preventDefault(); return false; }
+  });
+  // Block drag & select
+  document.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+  // DevTools detection
+  setInterval(() => {
+    const threshold = 160;
+    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0600;font-family:Black Ops One,cursive;color:#cc2200;font-size:24px;text-align:center;padding:20px;">🥊 Nope! DevTools sind hier verboten! 🥊</div>';
+    }
+  }, 1000);
+</script>
 </body>
 </html>
