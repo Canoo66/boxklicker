@@ -821,13 +821,15 @@ body::before{
   // Block drag & select
   document.addEventListener('dragstart', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
-  // DevTools detection
-  setInterval(() => {
-    const threshold = 160;
-    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0600;font-family:Black Ops One,cursive;color:#cc2200;font-size:24px;text-align:center;padding:20px;">🥊 Nope! DevTools sind hier verboten! 🥊</div>';
-    }
-  }, 1000);
+  // DevTools detection - only desktop, not mobile
+  if (!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    setInterval(() => {
+      const threshold = 160;
+      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0600;font-family:Black Ops One,cursive;color:#cc2200;font-size:24px;text-align:center;padding:20px;">🥊 Nope! DevTools sind hier verboten! 🥊</div>';
+      }
+    }, 1000);
+  }
 </script>
 </body>
 </html>
